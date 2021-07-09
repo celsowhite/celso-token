@@ -9,6 +9,18 @@
 
       <h3>{{ celsoToken.symbol }} Token</h3>
       <p>{{ celsoToken.balance }} {{ celsoToken.symbol }}</p>
+
+      <h3>Quantity</h3>
+      <form @submit.prevent="buyTokens">
+        <input
+          type="number"
+          id="quantity"
+          name="quantity"
+          min="1"
+          v-model.number="tokenQuantity"
+        />
+        <button type="submit">Buy More Tokens</button>
+      </form>
     </div>
 
     <div v-else>
@@ -35,6 +47,7 @@
           symbol: null,
           balance: null,
         },
+        tokenQuantity: 1,
       };
     },
     mounted: async function () {
@@ -42,19 +55,17 @@
       window.ethereum
         .request({ method: "eth_accounts" })
         .then(this.setupAccount);
+
+      // Setup an event listener for the account being changed.
+      window.ethereum.on("accountsChanged", (accounts) => {
+        this.setupAccount(accounts);
+      });
     },
     methods: {
       /*---------------------
       Initialize Dapp
       ---------------------*/
       async initializeDapp() {
-        this.initializeEthers();
-      },
-
-      /*---------------------
-      Initialize Ethers
-      ---------------------*/
-      async initializeEthers() {
         // Provider
         // Connection to the ethereum network.
         const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -73,6 +84,7 @@
           CelsoToken.abi,
           provider
         );
+        const value = await contract.getTokenValue();
 
         // Token Data
         const tokenBalance = await contract.balanceOf(this.userAddress);
@@ -82,13 +94,6 @@
           balance: ethers.utils.formatUnits(tokenBalance.toString()),
           symbol: tokenSymbol,
         };
-      },
-
-      /*---------------------
-      Get Token Data
-      ---------------------*/
-      async getTokenData() {
-        // const tokenBalance = await contract.balanceOf();
       },
 
       /*---------------------
@@ -113,6 +118,32 @@
         });
 
         this.setupAccount(accounts);
+      },
+
+      /*---------------------
+      Buy Tokens
+      ---------------------*/
+      async buyTokens() {
+        // Get the provider. When this is called, the user should already be authenticated by metamak.
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+
+        // Get the signer and initialize the contract with it.
+        // When sending ether you need to initialize contract via a signer not provider. Doing so allows us to initiate actions on the behalf of the signer.
+        const signer = provider.getSigner();
+        const contract = new ethers.Contract(
+          this.contractAddress.celsoToken,
+          CelsoToken.abi,
+          signer
+        );
+
+        // Calculate the total value the user would like to purchase.
+        const tokenValue = await contract.getTokenValue();
+        const totalValue = this.tokenQuantity * tokenValue;
+
+        // Call the contracts buy tokens method which mints the token quantity to the users account on the blockchain.
+        await contract.buyTokens(this.tokenQuantity, {
+          value: totalValue.toString(),
+        });
       },
     },
   };

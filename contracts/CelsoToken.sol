@@ -12,24 +12,34 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
  */
 contract CelsoToken is ERC20 {
   // Variables
-  uint256 initialSupply = 1000;
-  uint256 tokenValue = 3 ether;
-  string tokenName = "Celso White Token";
-  string tokenSymbol = "CELSO";
+  uint256 private _initialSupply = 1000;
+  uint256 private _tokenValue = 3 ether;
 
-  // Constructor
-  constructor() ERC20(tokenName, tokenSymbol) {
-    _mint(msg.sender, (initialSupply * (10**18)));
+  string private _tokenName = "Celso White Token";
+  string private _tokenSymbol = "CELSO";
+
+  /**
+   * @dev Sets the token name and symbol. Also mints an initial supply of the token.
+   */
+  constructor() ERC20(_tokenName, _tokenSymbol) {
+    _mint(msg.sender, (_initialSupply * (10**18)));
   }
 
   /**
-   * @notice Buy more Celso tokens.
-   * @param quantity The amount of tokens you'd like to buy.
+   * @dev Buy more Celso tokens.
+   * @param quantity The amount of tokens to buy.
    */
   function buyTokens(uint256 quantity) public payable {
     // Calculate the total cost of the tokens based on the quantity requested.
-    uint256 totalCost = quantity * tokenValue;
+    uint256 totalCost = quantity * _tokenValue;
     require(msg.value == totalCost, "More $$ please.");
     _mint(msg.sender, (quantity * (10**18)));
+  }
+
+  /**
+   * @return The token value in ether.
+   */
+  function getTokenValue() public view returns (uint256) {
+    return _tokenValue;
   }
 }
