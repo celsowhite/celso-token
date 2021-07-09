@@ -4,6 +4,6 @@ Test project to learn solidity and experiment with the ethereum network. This re
 
 ## Tech
 
-Hardhat - Contract development and testing.
-Vue 3 - Frontend app to create the user interface.
-Ethers - Library for interacting with the Ethereum blockchain via javascript.
+- Hardhat - Contract development and testing.
+- Vue 3 - Frontend app to create the user interface.
+- Ethers - Library for interacting with the Ethereum blockchain via javascript.
