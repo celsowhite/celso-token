@@ -4,8 +4,6 @@ import CelsoToken from "../../../../artifacts/contracts/CelsoToken.sol/CelsoToke
 
 /*----------------------------
 State
----
-Root state object that holds the global state for the site.
 ----------------------------*/
 
 const state = () => ({
@@ -97,6 +95,8 @@ const actions = {
     commit("setEthersProvider", rawProvider);
     commit("setSigner", rawSigner);
     commit("setNetwork", network);
+
+    return;
   },
 
   /**

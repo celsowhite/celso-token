@@ -12,10 +12,10 @@ app.use(store);
 // Filters
 app.config.globalProperties.$filters = {
   toEth(bigNumber) {
-    return `${ethers.utils.formatEther(bigNumber)} Eth`;
+    return `${ethers.utils.formatEther(bigNumber)}`;
   },
   toWei(bigNumber) {
-    return `${ethers.utils.formatUnits(bigNumber, "wei")} Wei`;
+    return `${ethers.utils.formatUnits(bigNumber, "wei")}`;
   },
 };
 
