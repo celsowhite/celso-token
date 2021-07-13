@@ -25,7 +25,9 @@
     </div>
 
     <div v-else>
-      <button @click="connectToAccount()">Connect</button>
+      <button @click="this.$store.dispatch('account/requestAccount')">
+        Connect
+      </button>
     </div>
   </div>
 </template>
@@ -59,10 +61,7 @@
         this.$store.dispatch("account/connectAccount");
       }
       // Setup an event listener for the account being changed.
-      this.$store.dispatch("account/setupEthereumListener");
-      /* window.ethereum.on("accountsChanged", (accounts) => {
-        this.setupAccount(accounts);
-      }); */
+      this.$store.dispatch("account/setupEthereumListeners");
     },
     methods: {
       /*---------------------
@@ -86,30 +85,6 @@
           balance: ethers.utils.formatUnits(tokenBalance.toString()),
           symbol: tokenSymbol,
         };
-      },
-
-      /*---------------------
-      Setup Account
-      ---------------------*/
-      async setupAccount(accounts) {
-        if (accounts.length === 0) {
-          alert("Please connect to MetaMask.");
-        } else {
-          this.$store.dispatch("account/connectAccount");
-        }
-      },
-
-      /*---------------------
-      Connect To Account
-      ---------------------*/
-      async connectToAccount() {
-        // Request access to the users metamask. Requesting access will resolve with a list of the users accounts we have access to.
-        // Once given access then we can connect to the ethereum network and the users account.
-        const accounts = await window.ethereum.request({
-          method: "eth_requestAccounts",
-        });
-
-        this.setupAccount(accounts);
       },
 
       /*---------------------

@@ -74,19 +74,22 @@ Actions
 ----------------------------*/
 
 const actions = {
+  /**
+   * Connect Account
+   *
+   * Get the ethereum provider, signer and network info.
+   */
   async connectAccount({ commit }) {
     // Provider - Connection to the ethereum network.
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const rawProvider = markRaw(provider);
+    const network = await provider.getNetwork();
 
     // Signer - Data about this particular ethereum user.
     const signer = provider.getSigner();
     const rawSigner = markRaw(signer);
     const signerAddress = await signer.getAddress();
     const signerBalance = await signer.getBalance();
-
-    // Network
-    const network = await provider.getNetwork();
 
     // Set account info in the global store.
     commit("setActiveAccount", signerAddress);
@@ -96,7 +99,31 @@ const actions = {
     commit("setNetwork", network);
   },
 
-  async setupEthereumListener({ commit, dispatch }) {
+  /**
+   * Request Account
+   *
+   * Request access to the users metamask account. Triggers the metamask popup.
+   */
+  async requestAccount({ commit, dispatch }) {
+    // Request access to the users metamask. Requesting access will resolve with a list of the users accounts we have access to.
+    // Once given access then we can connect to the ethereum network and the users account.
+    const accounts = await window.ethereum.request({
+      method: "eth_requestAccounts",
+    });
+
+    if (accounts.length === 0) {
+      alert("Please connect to MetaMask.");
+    } else {
+      dispatch("connectAccount");
+    }
+  },
+
+  /**
+   * Setup Ethereum Listeners
+   *
+   * Init ethereum listeners to react to account changes.
+   */
+  async setupEthereumListeners({ commit, dispatch }) {
     // Accounts Changed
     window.ethereum.on("accountsChanged", (accounts) => {
       dispatch("connectAccount");
@@ -104,7 +131,6 @@ const actions = {
 
     // Chain Changed
     window.ethereum.on("chainChanged", (chainId) => {
-      console.log(chainId);
       dispatch("connectAccount");
     });
   },
