@@ -1,11 +1,12 @@
 <template>
   <div class="app">
-    <div class="app__content" v-if="userAddress">
+    <div class="app__content" v-if="activeAccount">
       <h3>Account #</h3>
-      <p>{{ userAddress }}</p>
+      <p>{{ activeAccount }}</p>
 
       <h3>ETH Balance</h3>
-      <p>{{ userEthBalance }} ETH</p>
+      <p>{{ $filters.toEth(activeBalance) }}</p>
+      <p>{{ $filters.toWei(activeBalance) }}</p>
 
       <h3>{{ celsoToken.symbol }} Token</h3>
       <p>{{ celsoToken.balance }} {{ celsoToken.symbol }}</p>
@@ -32,6 +33,7 @@
 <script>
   import { ethers } from "ethers";
   import CelsoToken from "../../artifacts/contracts/CelsoToken.sol/CelsoToken.json";
+  import { mapState } from "vuex";
 
   export default {
     name: "App",
@@ -41,8 +43,6 @@
         contractAddress: {
           celsoToken: "0x5fbdb2315678afecb367f032d93f642f64180aa3",
         },
-        userAddress: null,
-        userEthBalance: null,
         celsoToken: {
           symbol: null,
           balance: null,
@@ -52,37 +52,29 @@
     },
     mounted: async function () {
       // Check for any accounts currently connected.
-      window.ethereum
-        .request({ method: "eth_accounts" })
-        .then(this.setupAccount);
-
-      // Setup an event listener for the account being changed.
-      window.ethereum.on("accountsChanged", (accounts) => {
-        this.setupAccount(accounts);
+      const accounts = await window.ethereum.request({
+        method: "eth_accounts",
       });
+      if (accounts.length > 0) {
+        this.$store.dispatch("account/connectAccount");
+      }
+      // Setup an event listener for the account being changed.
+      this.$store.dispatch("account/setupEthereumListener");
+      /* window.ethereum.on("accountsChanged", (accounts) => {
+        this.setupAccount(accounts);
+      }); */
     },
     methods: {
       /*---------------------
       Initialize Dapp
       ---------------------*/
       async initializeDapp() {
-        // Provider
-        // Connection to the ethereum network.
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-
-        // Signer
-        // Data about this particular ethereum user.
-        const signer = provider.getSigner();
-        this.userAddress = await signer.getAddress();
-        const ethBalance = await signer.getBalance();
-        this.userEthBalance = ethers.utils.formatUnits(ethBalance.toString());
-
         // Contract
         // The contract we'd like to interact with.
         const contract = new ethers.Contract(
           this.contractAddress.celsoToken,
           CelsoToken.abi,
-          provider
+          this.provider
         );
         const value = await contract.getTokenValue();
 
@@ -103,7 +95,7 @@
         if (accounts.length === 0) {
           alert("Please connect to MetaMask.");
         } else {
-          this.initializeDapp();
+          this.$store.dispatch("account/connectAccount");
         }
       },
 
@@ -124,7 +116,7 @@
       Buy Tokens
       ---------------------*/
       async buyTokens() {
-        // Get the provider. When this is called, the user should already be authenticated by metamak.
+        // Get the provider. When this is called, the user should already be authenticated by metamask.
         const provider = new ethers.providers.Web3Provider(window.ethereum);
 
         // Get the signer and initialize the contract with it.
@@ -145,6 +137,12 @@
           value: totalValue.toString(),
         });
       },
+    },
+    computed: {
+      ...mapState("account", {
+        activeAccount: (state) => state.activeAccount,
+        activeBalance: (state) => state.activeBalance,
+      }),
     },
   };
 </script>
