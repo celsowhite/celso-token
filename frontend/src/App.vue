@@ -42,8 +42,6 @@
 </template>
 
 <script>
-  import { ethers } from "ethers";
-  import CelsoToken from "../../artifacts/contracts/CelsoToken.sol/CelsoToken.json";
   import { mapState } from "vuex";
 
   export default {

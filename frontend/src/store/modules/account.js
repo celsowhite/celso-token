@@ -1,6 +1,5 @@
-import { markRaw, isReactive } from "vue";
+import { markRaw } from "vue";
 import { ethers } from "ethers";
-import CelsoToken from "../../../../artifacts/contracts/CelsoToken.sol/CelsoToken.json";
 
 /*----------------------------
 State
