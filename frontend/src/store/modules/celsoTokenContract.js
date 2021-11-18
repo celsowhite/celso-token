@@ -48,7 +48,7 @@ const actions = {
   /**
    * Get Contract Data
    *
-   * Get the ethereum provider, signer and network info.
+   * Get the token info.
    */
   async getContractData({ state, commit, rootState }) {
     // Contract

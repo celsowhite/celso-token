@@ -37,7 +37,7 @@ contract CelsoToken is ERC20 {
   }
 
   /**
-   * @return The token value in ether.
+   * @return The token value in ether. Setting a getter function rather than a allowing direct access to the public value so other contracts can't change the tokenValue.
    */
   function getTokenValue() public view returns (uint256) {
     return _tokenValue;
